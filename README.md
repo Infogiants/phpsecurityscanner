@@ -2,7 +2,7 @@
 
 A PHP Class to recursively scan vulnerable php functions inside directory.
 
-# Usages ( Can be run command line )
+# Usages
 
 Argument 1: PHP Class Name
 Argument 2: Directory Path to scan
