@@ -54,6 +54,7 @@ class SecurityScan
      * @return []
      */
     public static function findRecursiveFilesByFormat($path, $format) {
+        $files = [];
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($path),
                 RecursiveIteratorIterator::CHILD_FIRST
@@ -95,26 +96,28 @@ class SecurityScan
             
             //Loop and Read Files and check for vulenrable database patterns
             foreach ($this->tmpDirs as $files) {
-                foreach ($files as $file) {
-                    $badLines = null;
-                    $lines = file($file, FILE_IGNORE_NEW_LINES); // Read the file into an array
-                    $lineIndex = 0;
-                    foreach ($lines as $key => $line) {
-                        //Scan Line aganinst vulenrable databse
-                        foreach ($this->vulnerableDatabase as $defination) {
-                            if (stristr($line, $defination)) {
-                                $this->errorCount++;
-                                //Increment error count flag
-                                $badLines .= PHP_EOL."\e[1;33;41m Record :\e[0m\e[0;30;46m ".$this->errorCount." \e[0m".PHP_EOL.PHP_EOL;
-                                $badLines .= "\e[0;30;42m File Path \e[0m: ".$file.PHP_EOL.PHP_EOL;
-                                $badLines .= "\e[0;30;42m Line Number \e[0m: ".$key.PHP_EOL.PHP_EOL;
-                                $badLines .= "\e[0;30;42m Line Content \e[0m:". $line.PHP_EOL.PHP_EOL;
-                                $badLines .= "\e[0;30;42m Error \e[0m:". trim(htmlspecialchars(substr(stristr($line, $defination), self::ERRORLINELIMITSTART, self::ERRORLINELIMITEND))) . PHP_EOL;
+                if(!empty($files)) {
+                    foreach ($files as $file) {
+                        $badLines = null;
+                        $lines = file($file, FILE_IGNORE_NEW_LINES); // Read the file into an array
+                        $lineIndex = 0;
+                        foreach ($lines as $key => $line) {
+                            //Scan Line aganinst vulenrable databse
+                            foreach ($this->vulnerableDatabase as $defination) {
+                                if (stristr($line, $defination)) {
+                                    $this->errorCount++;
+                                    //Increment error count flag
+                                    $badLines .= PHP_EOL."\e[1;33;41m Record :\e[0m\e[0;30;46m ".$this->errorCount." \e[0m".PHP_EOL.PHP_EOL;
+                                    $badLines .= "\e[0;30;42m File Path \e[0m: ".$file.PHP_EOL.PHP_EOL;
+                                    $badLines .= "\e[0;30;42m Line Number \e[0m: ".$key.PHP_EOL.PHP_EOL;
+                                    $badLines .= "\e[0;30;42m Line Content \e[0m:". $line.PHP_EOL.PHP_EOL;
+                                    $badLines .= "\e[0;30;42m Error \e[0m:". trim(htmlspecialchars(substr(stristr($line, $defination), self::ERRORLINELIMITSTART, self::ERRORLINELIMITEND))) . PHP_EOL;
+                                }
                             }
+                            $lineIndex++;
                         }
-                        $lineIndex++;
+                        echo $badLines;
                     }
-                    echo $badLines;
                 }
             }
             echo PHP_EOL."\e[1;33;41mTotal Vulenrabilities Found:\e[0m". "\e[0;30;46m ".$this->errorCount." \e[0m".PHP_EOL.PHP_EOL;
